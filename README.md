@@ -39,7 +39,7 @@ The platform is built around the following recruitment entities:
 
 ### Prerequisites
 - JDK 21+
-- A running Postgres instance (or use the embedded H2 for local dev)
+- Docker & Docker Compose (for local infrastructure)
 
 ### Environment
 The server behaves differently based on the `ktor.development` flag in `application.yaml`:
@@ -49,6 +49,40 @@ The server behaves differently based on the `ktor.development` flag in `applicat
 ### Monitoring
 Tracing is enabled by default. Ensure your environment has the following set for Grafana/OTEL:
 `OTEL_EXPORTER_OTLP_ENDPOINT=http://your-otel-collector:4317`
+
+## Development Workflow
+
+We use a `Makefile` to streamline the local development process.
+
+### 1. Configuration
+A `.env` file is required in the root directory to configure ports and versions for the infrastructure.
+A default `.env` file has been generated with standard ports (Postgres: 5432, Grafana: 3000, etc.).
+
+### 2. Start Infrastructure
+To spin up Postgres, Kafka, and the full Observability stack (Grafana, Loki, Tempo, Prometheus, Otel Collector):
+```bash
+make up
+```
+*Note: Ensure Docker Desktop (or your Docker daemon) is running.*
+
+### 3. Run Server
+To run the Ktor server in development mode (hot-reload enabled where supported):
+```bash
+make dev
+```
+The server will start on port `8080`.
+
+### 4. View Logs
+To view logs from the infrastructure containers:
+```bash
+make logs
+```
+
+### 5. Stop Infrastructure
+To stop and remove the infrastructure containers:
+```bash
+make down
+```
 
 ---
 
