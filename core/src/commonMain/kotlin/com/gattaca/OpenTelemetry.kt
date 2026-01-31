@@ -5,15 +5,16 @@ import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk
 import io.opentelemetry.semconv.ServiceAttributes
 
 fun getOpenTelemetry(serviceName: String): OpenTelemetry {
-    // Disable metrics exporter because the `jaegertracing/all-in-one`image, which we use in the example,
-    // does not support OpenTelemetry metrics, so we prevent unnecessary configuration or warnings.
-    System.setProperty("otel.metrics.exporter", "none")
-
-    return AutoConfiguredOpenTelemetrySdk.builder().addResourceCustomizer { oldResource, _ ->
-        oldResource.toBuilder()
-            .putAll(oldResource.attributes)
-            .put(ServiceAttributes.SERVICE_NAME, serviceName)
-            .build()
-    }.build().openTelemetrySdk
+    // Configuration for Grafana stack (Tempo/Loki/Prometheus)
+    // We rely on OTLP as the standard exporter.
+    // Ensure environment variables like OTEL_EXPORTER_OTLP_ENDPOINT are set in the environment.
+    
+    return AutoConfiguredOpenTelemetrySdk.builder()
+        .addResourceCustomizer { oldResource, _ ->
+            oldResource.toBuilder()
+                .put(ServiceAttributes.SERVICE_NAME, serviceName)
+                .build()
+        }
+        .build()
+        .openTelemetrySdk
 }
-
