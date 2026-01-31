@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.kotlin.plugin.serialization)
 }
 
 kotlin {
@@ -11,6 +12,11 @@ kotlin {
             api(libs.opentelemetry.semconv)
             api(libs.opentelemetry.exporter.otlp)
             api(libs.opentelemetry.ktor)
+            api(libs.ktor.serialization.kotlinx.json)
+        }
+        jvmMain.dependencies {
+            implementation(libs.postgresql)
+            implementation(libs.h2)
         }
     }
 }

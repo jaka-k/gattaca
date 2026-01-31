@@ -13,7 +13,7 @@ class ApplicationTest {
         application {
             module()
         }
-        client.get("/").apply {
+        client.get("/landing/exercises").apply {
             assertEquals(HttpStatusCode.OK, status)
         }
     }

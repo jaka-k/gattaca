@@ -1,5 +1,6 @@
 package com.gattaca
 
+import com.gattaca.configs.*
 import io.ktor.server.application.*
 
 fun main(args: Array<String>) {
@@ -7,11 +8,11 @@ fun main(args: Array<String>) {
 }
 
 fun Application.module() {
-    val repos = configureDatabases()
+    val deps = configureDatabases()
     configureSerialization()
     configureMonitoring()
     configureExceptionHandling()
     configureSecurity()
     configureHTTP()
-    configureRouting(repos)
+    configureRouting(deps)
 }

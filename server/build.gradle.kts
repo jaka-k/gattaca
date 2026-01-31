@@ -9,11 +9,12 @@ application {
 }
 
 kotlin {
-    jvmToolchain(21)
+    jvmToolchain(25)
 }
 
 dependencies {
     implementation(project(":core"))
+    implementation(project(":client"))
     implementation(libs.ktor.server.kafka)
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.server.core)
@@ -30,6 +31,7 @@ dependencies {
     implementation(libs.ktor.server.openapi)
     implementation(libs.kotlin.asyncapi.ktor)
     implementation(libs.ktor.server.netty)
+    implementation(libs.ktor.server.status.pages)
     implementation(libs.logback.classic)
     implementation(libs.ktor.server.config.yaml)
     testImplementation(libs.ktor.server.test.host)
