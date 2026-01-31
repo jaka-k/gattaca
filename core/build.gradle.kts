@@ -19,4 +19,8 @@ kotlin {
             implementation(libs.h2)
         }
     }
+
+    sourceSets.all {
+        languageSettings.optIn("kotlin.uuid.ExperimentalUuidApi")
+    }
 }

@@ -2,34 +2,36 @@
 
 To ensure maintainability, testability, and clarity, all agents must adhere to the following architectural standards:
 
-## 1. Logic-First Reusability
-- **Business Logic belongs in `:core`**: All services, use cases, and domain logic must reside in the `core` module.
-- **`:server` is Infrastructure**: The server module should only handle HTTP concerns (Ktor), Persistence (JDBC), and Configuration. Keep it thin.
+## 1. Logic-First Core
+- **Business Logic belongs in `:core/commonMain`**: All services, use cases, and business logic must reside in the `core` module's common source set. This ensures logic is platform-agnostic and reusable.
+- **`:server` is purely Delivery**: The server module should only contain Ktor Routes (`api` package) and Dependency Wiring (`config` package).
+- **`:client` is for Communication**: Use the provided Public and Internal client configurations for any outgoing HTTP requests to ensure consistent telemetry and serialization.
 
 ## 2. Package Structure
-- **Core**:
-    - `com.gattaca.domain`: Models and Repository Interfaces (Ports).
-    - `com.gattaca.service`: Business logic/Services.
+- **Core (`commonMain`)**:
+    - `com.gattaca.domain`: Pure models, Repository interfaces (Ports), and Exceptions.
+    - `com.gattaca.service`: Business logic services that coordinate domain models.
+- **Core (`jvmMain`)**:
+    - `com.gattaca.infrastructure`: JDBC repository implementations and `DatabaseInitializer`.
 - **Server**:
-    - `com.gattaca.api`: Controllers and Routes.
-    - `com.gattaca.persistence`: Database implementations.
-    - `com.gattaca.config`: Ktor setup.
+    - `com.gattaca.api`: Ktor Routes and Controllers.
+    - `com.gattaca.config`: Ktor setup and `AppDependencies` wiring.
+    - `com.gattaca.service`: Server-specific services (e.g., Auth/Security logic that requires JVM-specific libraries).
 
 ## 3. Service-Oriented Flow
 - **Routes -> Services -> Repositories**: 
-    - Controllers/Routes should delegate to Services in `core`.
-    - Services should coordinate domain models and repository interfaces.
-    - Controllers should **never** perform business logic (e.g., password hashing, complex validation).
+    - Controllers must delegate all logic to Services.
+    - Services coordinate domain models and repository interfaces.
+    - **Never** perform business logic or database queries directly in Controllers.
 
-## 4. Interface-Driven Development
-- Define Repository interfaces in `core`.
-- Implement them in `server` (or other infrastructure modules).
-- Services must only depend on interfaces, never on implementations.
+## 4. Automated Database Initialization
+- All table creation logic must reside in `com.gattaca.infrastructure.DatabaseInitializer`.
+- Tables must be created using `IF NOT EXISTS` to ensure safe startup.
 
-## 5. Testability
-- Unit test business logic in `core` using mocks for repositories.
-- Use integration tests in `server` to verify the full HTTP -> Service -> DB stack.
+## 5. Interface-Driven Development
+- Define all Repository and Utility interfaces in `core/commonMain`.
+- Services must only depend on these interfaces, never on concrete implementations (like JDBC).
 
-## 6. Error Handling
-- Use domain-specific exceptions in `core`.
-- Map these exceptions to HTTP status codes in `server` using Ktor's `StatusPages`.
+## 6. Testability
+- **Unit Tests**: Test business logic in `core` using mocks for repositories.
+- **Integration Tests**: Verify the full stack in `server` (HTTP -> Service -> Database).

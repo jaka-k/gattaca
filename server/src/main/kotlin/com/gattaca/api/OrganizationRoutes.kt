@@ -6,6 +6,7 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
+import kotlin.uuid.Uuid
 
 @Serializable
 data class CreateOrganizationRequest(val name: String)
@@ -17,8 +18,9 @@ fun Route.organizationRoutes(orgRepo: OrganizationRepository) {
         }
 
         get("/{id}") {
-            val id = call.parameters["id"]?.toIntOrNull()
-            if (id == null) {
+            val id = try {
+                Uuid.parse(call.parameters["id"]!!)
+            } catch (e: Exception) {
                 call.respond(HttpStatusCode.BadRequest, "Invalid ID")
                 return@get
             }
@@ -38,8 +40,9 @@ fun Route.organizationRoutes(orgRepo: OrganizationRepository) {
         }
 
         put("/{id}") {
-            val id = call.parameters["id"]?.toIntOrNull()
-            if (id == null) {
+            val id = try {
+                Uuid.parse(call.parameters["id"]!!)
+            } catch (e: Exception) {
                 call.respond(HttpStatusCode.BadRequest, "Invalid ID")
                 return@put
             }
@@ -55,8 +58,9 @@ fun Route.organizationRoutes(orgRepo: OrganizationRepository) {
         }
 
         delete("/{id}") {
-            val id = call.parameters["id"]?.toIntOrNull()
-            if (id == null) {
+            val id = try {
+                Uuid.parse(call.parameters["id"]!!)
+            } catch (e: Exception) {
                 call.respond(HttpStatusCode.BadRequest, "Invalid ID")
                 return@delete
             }

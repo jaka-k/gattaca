@@ -8,10 +8,11 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
+import kotlin.uuid.Uuid
 
 @Serializable
 data class CreateUserRequest(
-    val organizationId: Int,
+    val organizationId: Uuid,
     val name: String,
     val email: String,
     val password: String
@@ -19,7 +20,7 @@ data class CreateUserRequest(
 
 @Serializable
 data class UpdateUserRequest(
-    val organizationId: Int,
+    val organizationId: Uuid,
     val name: String,
     val email: String,
     val password: String? = null
@@ -27,15 +28,15 @@ data class UpdateUserRequest(
 
 @Serializable
 data class UserResponse(
-    val id: Int,
-    val organizationId: Int,
+    val id: Uuid,
+    val organizationId: Uuid,
     val name: String,
     val email: String
 )
 
 fun User.toResponse(): UserResponse {
     return UserResponse(
-        id = this.id ?: 0,
+        id = this.id ?: Uuid.random(), // Should not be null if persisted
         organizationId = this.organizationId,
         name = this.name,
         email = this.email
@@ -49,7 +50,11 @@ fun Route.userRoutes(userService: UserService) {
         }
 
         get("/{id}") {
-            val id = call.parameters["id"]?.toIntOrNull() ?: throw GattacaException(ErrorCode.BAD_REQUEST, "Invalid ID", status = 400)
+            val id = try {
+                Uuid.parse(call.parameters["id"]!!)
+            } catch (e: Exception) {
+                throw GattacaException(ErrorCode.BAD_REQUEST, "Invalid ID", status = 400)
+            }
             call.respond(userService.findById(id).toResponse())
         }
 
@@ -60,14 +65,22 @@ fun Route.userRoutes(userService: UserService) {
         }
 
         put("/{id}") {
-            val id = call.parameters["id"]?.toIntOrNull() ?: throw GattacaException(ErrorCode.BAD_REQUEST, "Invalid ID", status = 400)
+            val id = try {
+                Uuid.parse(call.parameters["id"]!!)
+            } catch (e: Exception) {
+                throw GattacaException(ErrorCode.BAD_REQUEST, "Invalid ID", status = 400)
+            }
             val request = call.receive<UpdateUserRequest>()
             userService.update(id, request.organizationId, request.name, request.email, request.password)
             call.respond(HttpStatusCode.OK)
         }
 
         delete("/{id}") {
-            val id = call.parameters["id"]?.toIntOrNull() ?: throw GattacaException(ErrorCode.BAD_REQUEST, "Invalid ID", status = 400)
+            val id = try {
+                Uuid.parse(call.parameters["id"]!!)
+            } catch (e: Exception) {
+                throw GattacaException(ErrorCode.BAD_REQUEST, "Invalid ID", status = 400)
+            }
             userService.delete(id)
             call.respond(HttpStatusCode.NoContent)
         }

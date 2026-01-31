@@ -6,10 +6,11 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
+import kotlin.uuid.Uuid
 
 @Serializable
 data class CreateExerciseRequest(
-    val creatorId: Int,
+    val creatorId: Uuid,
     val title: String,
     val description: String
 )
@@ -21,8 +22,9 @@ fun Route.exerciseRoutes(exerciseRepo: ExerciseRepository) {
         }
 
         get("/{id}") {
-            val id = call.parameters["id"]?.toIntOrNull()
-            if (id == null) {
+            val id = try {
+                Uuid.parse(call.parameters["id"]!!)
+            } catch (e: Exception) {
                 call.respond(HttpStatusCode.BadRequest, "Invalid ID")
                 return@get
             }
@@ -46,8 +48,9 @@ fun Route.exerciseRoutes(exerciseRepo: ExerciseRepository) {
         }
 
         put("/{id}") {
-            val id = call.parameters["id"]?.toIntOrNull()
-            if (id == null) {
+            val id = try {
+                Uuid.parse(call.parameters["id"]!!)
+            } catch (e: Exception) {
                 call.respond(HttpStatusCode.BadRequest, "Invalid ID")
                 return@put
             }
@@ -68,8 +71,9 @@ fun Route.exerciseRoutes(exerciseRepo: ExerciseRepository) {
         }
 
         delete("/{id}") {
-            val id = call.parameters["id"]?.toIntOrNull()
-            if (id == null) {
+            val id = try {
+                Uuid.parse(call.parameters["id"]!!)
+            } catch (e: Exception) {
                 call.respond(HttpStatusCode.BadRequest, "Invalid ID")
                 return@delete
             }

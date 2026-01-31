@@ -1,19 +1,23 @@
 package com.gattaca.api
 
+import com.gattaca.domain.*
 import com.gattaca.service.AuthService
-import com.gattaca.configs.UserSession
+import com.gattaca.config.KtorUserSession
 import io.ktor.http.*
+import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
 import kotlinx.serialization.Serializable
+import io.ktor.util.*
+import kotlin.uuid.Uuid
 
 @Serializable
 data class LoginRequest(val email: String, val password: String)
 
 @Serializable
-data class RegisterRequest(val name: String, val email: String, val password: String, val organizationId: Int)
+data class RegisterRequest(val name: String, val email: String, val password: String, val organizationId: Uuid)
 
 fun Route.authRoutes(authService: AuthService) {
     route("/auth") {
@@ -22,7 +26,9 @@ fun Route.authRoutes(authService: AuthService) {
             val user = authService.login(request.email, request.password)
             
             if (user != null) {
-                call.sessions.set(UserSession(user.id.toString()))
+                // Generate a session ID
+                val sessionId = generateNonce()
+                call.sessions.set(KtorUserSession(sessionId = sessionId, userId = user.id.toString()))
                 call.respond(HttpStatusCode.OK, "Logged in")
             } else {
                 call.respond(HttpStatusCode.Unauthorized, "Invalid credentials")
@@ -30,7 +36,7 @@ fun Route.authRoutes(authService: AuthService) {
         }
 
         post("/logout") {
-            call.sessions.clear<UserSession>()
+            call.sessions.clear<KtorUserSession>()
             call.respond(HttpStatusCode.OK, "Logged out")
         }
 

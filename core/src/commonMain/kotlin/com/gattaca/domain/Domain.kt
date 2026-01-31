@@ -1,26 +1,30 @@
 package com.gattaca.domain
 
 import kotlinx.serialization.Serializable
+import kotlin.uuid.Uuid
 
 // --- Models ---
 
 @Serializable
-data class Organization(val id: Int? = null, val name: String)
+data class Organization(val id: Uuid? = null, val name: String)
 
 @Serializable
-data class User(val id: Int? = null, val organizationId: Int, val name: String, val email: String, val passwordHash: String? = null)
+data class User(val id: Uuid? = null, val organizationId: Uuid, val name: String, val email: String, val passwordHash: String? = null)
 
 @Serializable
-data class Exercise(val id: Int? = null, val creatorId: Int, val title: String, val description: String)
+data class UserSession(val sessionId: String, val userId: String, val accessToken: String? = null)
 
 @Serializable
-data class Candidate(val id: Int? = null, val name: String, val email: String, val githubProfile: String? = null)
+data class Exercise(val id: Uuid? = null, val creatorId: Uuid, val title: String, val description: String)
+
+@Serializable
+data class Candidate(val id: Uuid? = null, val name: String, val email: String, val githubProfile: String? = null)
 
 @Serializable
 data class Evaluation(
-    val id: Int? = null, 
-    val candidateId: Int, 
-    val exerciseId: Int, 
+    val id: Uuid? = null, 
+    val candidateId: Uuid, 
+    val exerciseId: Uuid, 
     val score: Int, 
     val feedback: String
 )
@@ -28,43 +32,49 @@ data class Evaluation(
 // --- Repository Interfaces (Ports) ---
 
 interface OrganizationRepository {
-    suspend fun save(org: Organization): Int
-    suspend fun findById(id: Int): Organization?
+    suspend fun save(org: Organization): Uuid
+    suspend fun findById(id: Uuid): Organization?
     suspend fun findAll(): List<Organization>
     suspend fun update(org: Organization): Boolean
-    suspend fun delete(id: Int): Boolean
+    suspend fun delete(id: Uuid): Boolean
 }
 
 interface UserRepository {
-    suspend fun save(user: User): Int
-    suspend fun findById(id: Int): User?
+    suspend fun save(user: User): Uuid
+    suspend fun findById(id: Uuid): User?
     suspend fun findAll(): List<User>
-    suspend fun findByOrganizationId(orgId: Int): List<User>
+    suspend fun findByOrganizationId(orgId: Uuid): List<User>
     suspend fun findByEmail(email: String): User?
     suspend fun update(user: User): Boolean
-    suspend fun delete(id: Int): Boolean
+    suspend fun delete(id: Uuid): Boolean
 }
 
 interface ExerciseRepository {
-    suspend fun save(exercise: Exercise): Int
-    suspend fun findById(id: Int): Exercise?
+    suspend fun save(exercise: Exercise): Uuid
+    suspend fun findById(id: Uuid): Exercise?
     suspend fun findAll(): List<Exercise>
     suspend fun update(exercise: Exercise): Boolean
-    suspend fun delete(id: Int): Boolean
+    suspend fun delete(id: Uuid): Boolean
 }
 
 interface CandidateRepository {
-    suspend fun save(candidate: Candidate): Int
-    suspend fun findById(id: Int): Candidate?
+    suspend fun save(candidate: Candidate): Uuid
+    suspend fun findById(id: Uuid): Candidate?
     suspend fun findAll(): List<Candidate>
     suspend fun findByEmail(email: String): Candidate?
     suspend fun update(candidate: Candidate): Boolean
-    suspend fun delete(id: Int): Boolean
+    suspend fun delete(id: Uuid): Boolean
 }
 
 interface EvaluationRepository {
-    suspend fun save(evaluation: Evaluation): Int
-    suspend fun findByCandidateId(candidateId: Int): List<Evaluation>
+    suspend fun save(evaluation: Evaluation): Uuid
+    suspend fun findByCandidateId(candidateId: Uuid): List<Evaluation>
+}
+
+interface SessionRepository {
+    suspend fun save(session: UserSession)
+    suspend fun findById(sessionId: String): UserSession?
+    suspend fun delete(sessionId: String)
 }
 
 // --- Exceptions ---

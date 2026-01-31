@@ -5,6 +5,7 @@ import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import kotlin.uuid.Uuid
 
 fun Route.dashboardRoutes(
     orgRepo: OrganizationRepository,
@@ -39,11 +40,15 @@ fun Route.dashboardRoutes(
         }
 
         get("/candidates/{id}/evaluations") {
-            val id = call.parameters["id"]?.toIntOrNull() ?: throw GattacaException(
-                ErrorCode.BAD_REQUEST,
-                "Invalid candidate ID",
-                status = 400
-            )
+            val id = try {
+                Uuid.parse(call.parameters["id"]!!)
+            } catch (e: Exception) {
+                throw GattacaException(
+                    ErrorCode.BAD_REQUEST,
+                    "Invalid candidate ID",
+                    status = 400
+                )
+            }
             val evaluations = evaluationRepo.findByCandidateId(id)
             if (evaluations.isEmpty()) {
                 throw GattacaException(

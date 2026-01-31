@@ -7,6 +7,7 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
+import kotlin.uuid.Uuid
 
 @Serializable
 data class CreateCandidateRequest(
@@ -22,7 +23,11 @@ fun Route.candidateRoutes(candidateService: CandidateService) {
         }
 
         get("/{id}") {
-            val id = call.parameters["id"]?.toIntOrNull() ?: throw GattacaException(ErrorCode.BAD_REQUEST, "Invalid ID", status = 400)
+            val id = try {
+                Uuid.parse(call.parameters["id"]!!)
+            } catch (e: Exception) {
+                throw GattacaException(ErrorCode.BAD_REQUEST, "Invalid ID", status = 400)
+            }
             call.respond(candidateService.findById(id))
         }
 
@@ -33,14 +38,22 @@ fun Route.candidateRoutes(candidateService: CandidateService) {
         }
 
         put("/{id}") {
-            val id = call.parameters["id"]?.toIntOrNull() ?: throw GattacaException(ErrorCode.BAD_REQUEST, "Invalid ID", status = 400)
+            val id = try {
+                Uuid.parse(call.parameters["id"]!!)
+            } catch (e: Exception) {
+                throw GattacaException(ErrorCode.BAD_REQUEST, "Invalid ID", status = 400)
+            }
             val request = call.receive<CreateCandidateRequest>()
             candidateService.update(id, request.name, request.email, request.githubProfile)
             call.respond(HttpStatusCode.OK)
         }
 
         delete("/{id}") {
-            val id = call.parameters["id"]?.toIntOrNull() ?: throw GattacaException(ErrorCode.BAD_REQUEST, "Invalid ID", status = 400)
+            val id = try {
+                Uuid.parse(call.parameters["id"]!!)
+            } catch (e: Exception) {
+                throw GattacaException(ErrorCode.BAD_REQUEST, "Invalid ID", status = 400)
+            }
             candidateService.delete(id)
             call.respond(HttpStatusCode.NoContent)
         }
