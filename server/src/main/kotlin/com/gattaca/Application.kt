@@ -7,10 +7,11 @@ fun main(args: Array<String>) {
 }
 
 fun Application.module() {
-    val cityService = configureDatabases()
+    val repos = configureDatabases()
     configureSerialization()
     configureMonitoring()
+    configureExceptionHandling()
     configureSecurity()
     configureHTTP()
-    configureRouting(cityService)
+    configureRouting(repos)
 }

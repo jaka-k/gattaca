@@ -10,19 +10,17 @@ Gattaca is a Ktor-based multi-module project focused on clean architecture and m
 
 ## Recent Changes & Cleanup
 
-- **Renamed Project**: The project was renamed from `ktor-sample` to `gattaca`.
-- **Package Reorganization**: All source files were moved from `com.example` to `com.gattaca`.
-- **Interface-Driven Design**: 
-    - Extracted `ICityService` interface from `CityService`.
-    - Implemented `JdbcCityService` as the JDBC-backed implementation.
-    - Moved the `City` model to the `core` module for shared access.
-- **Agent Guidelines**: Established a `.instructions` folder with guidelines for future development, emphasizing:
-    - Modularization
-    - Interface-driven development
-    - Dependency Injection
-    - Type-safe configuration
-    - Global error handling
-- **Gradle Configuration**: Connected all modules and verified the Gradle wrapper.
+- **Domain Refactoring**: Removed `City` model and replaced it with a recruitment domain:
+    - `Organization`: Companies using the platform.
+    - `User`: Members of organizations who create exercises.
+    - `Exercise`: Assessment tasks for candidates.
+    - `Candidate`: Individuals being evaluated.
+    - `Evaluation`: Results and feedback for a candidate on a specific exercise.
+- **Hexagonal Architecture**:
+    - **Core**: Contains domain models and repository interfaces (Ports).
+    - **Server**: Contains JDBC implementations (Adapters) and Ktor routing.
+- **Repository Pattern**: Implemented for all domain models with JDBC-backed storage.
+- **Multi-Client Support**: Dedicated controllers for `Landing` and `Dashboard` clients.
 
 ## Guidelines for Agents
 

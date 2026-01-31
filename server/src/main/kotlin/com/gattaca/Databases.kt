@@ -1,15 +1,27 @@
 package com.gattaca
 
-import com.gattaca.adapters.outbound.persistence.JdbcCityRepository
-import com.gattaca.domain.services.CityDomainService
+import com.gattaca.adapters.outbound.persistence.*
 import io.ktor.server.application.*
 import java.sql.Connection
 import java.sql.DriverManager
 
-fun Application.configureDatabases(): CityDomainService {
+class AppRepositories(
+    val orgRepo: JdbcOrganizationRepository,
+    val userRepo: JdbcUserRepository,
+    val exerciseRepo: JdbcExerciseRepository,
+    val candidateRepo: JdbcCandidateRepository,
+    val evaluationRepo: JdbcEvaluationRepository
+)
+
+fun Application.configureDatabases(): AppRepositories {
     val dbConnection: Connection = connectToPostgres(embedded = true)
-    val cityRepository = JdbcCityRepository(dbConnection)
-    return CityDomainService(cityRepository)
+    return AppRepositories(
+        JdbcOrganizationRepository(dbConnection),
+        JdbcUserRepository(dbConnection),
+        JdbcExerciseRepository(dbConnection),
+        JdbcCandidateRepository(dbConnection),
+        JdbcEvaluationRepository(dbConnection)
+    )
 }
 
 fun Application.connectToPostgres(embedded: Boolean): Connection {
