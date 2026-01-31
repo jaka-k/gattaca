@@ -1,7 +1,9 @@
 package com.gattaca
 
 import com.gattaca.adapters.inbound.web.auth.authRoutes
+import com.gattaca.adapters.inbound.web.candidate.candidateRoutes
 import com.gattaca.adapters.inbound.web.dashboard.dashboardRoutes
+import com.gattaca.adapters.inbound.web.exercise.exerciseRoutes
 import com.gattaca.adapters.inbound.web.landing.landingRoutes
 import com.gattaca.adapters.inbound.web.organization.organizationRoutes
 import com.gattaca.adapters.inbound.web.user.userRoutes
@@ -16,6 +18,8 @@ fun Application.configureRouting(repos: AppRepositories) {
         authRoutes(repos.userRepo)
         organizationRoutes(repos.orgRepo)
         userRoutes(repos.userRepo)
+        exerciseRoutes(repos.exerciseRepo)
+        candidateRoutes(repos.candidateRepo)
         landingRoutes(repos.exerciseRepo)
         dashboardRoutes(
             repos.orgRepo,

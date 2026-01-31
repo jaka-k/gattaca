@@ -1,0 +1,498 @@
+openapi: 3.0.3
+info:
+  title: Gattaca Recruitment Platform API
+  description: API for managing organizations, users, exercises, and candidates.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Local Development Server
+
+paths:
+  # Auth
+  /auth/login:
+    post:
+      summary: Login user
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Logged in successfully
+        '401':
+          description: Invalid credentials
+  /auth/logout:
+    post:
+      summary: Logout user
+      tags: [Auth]
+      responses:
+        '200':
+          description: Logged out successfully
+  /auth/register:
+    post:
+      summary: Register new user
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+
+  # Organizations
+  /organizations:
+    get:
+      summary: List all organizations
+      tags: [Organizations]
+      responses:
+        '200':
+          description: List of organizations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Organization'
+    post:
+      summary: Create organization
+      tags: [Organizations]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrganizationRequest'
+      responses:
+        '201':
+          description: Organization created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+
+  /organizations/{id}:
+    get:
+      summary: Get organization by ID
+      tags: [Organizations]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Organization found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+        '404':
+          description: Organization not found
+    put:
+      summary: Update organization
+      tags: [Organizations]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrganizationRequest'
+      responses:
+        '200':
+          description: Organization updated
+        '404':
+          description: Organization not found
+    delete:
+      summary: Delete organization
+      tags: [Organizations]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Organization deleted
+        '404':
+          description: Organization not found
+
+  # Users
+  /users:
+    get:
+      summary: List all users
+      tags: [Users]
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserResponse'
+    post:
+      summary: Create user
+      tags: [Users]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+      responses:
+        '201':
+          description: User created
+        '409':
+          description: User already exists
+  /users/{id}:
+    get:
+      summary: Get user by ID
+      tags: [Users]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: User found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '404':
+          description: User not found
+    put:
+      summary: Update user
+      tags: [Users]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: User updated
+        '404':
+          description: User not found
+    delete:
+      summary: Delete user
+      tags: [Users]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: User deleted
+        '404':
+          description: User not found
+
+  # Exercises
+  /exercises:
+    get:
+      summary: List all exercises
+      tags: [Exercises]
+      responses:
+        '200':
+          description: List of exercises
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Exercise'
+    post:
+      summary: Create exercise
+      tags: [Exercises]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateExerciseRequest'
+      responses:
+        '201':
+          description: Exercise created
+  /exercises/{id}:
+    get:
+      summary: Get exercise by ID
+      tags: [Exercises]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Exercise found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Exercise'
+        '404':
+          description: Exercise not found
+    put:
+      summary: Update exercise
+      tags: [Exercises]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateExerciseRequest'
+      responses:
+        '200':
+          description: Exercise updated
+        '404':
+          description: Exercise not found
+    delete:
+      summary: Delete exercise
+      tags: [Exercises]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Exercise deleted
+        '404':
+          description: Exercise not found
+
+  # Candidates
+  /candidates:
+    get:
+      summary: List all candidates
+      tags: [Candidates]
+      responses:
+        '200':
+          description: List of candidates
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Candidate'
+    post:
+      summary: Create candidate
+      tags: [Candidates]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCandidateRequest'
+      responses:
+        '201':
+          description: Candidate created
+        '409':
+          description: Candidate already exists
+  /candidates/{id}:
+    get:
+      summary: Get candidate by ID
+      tags: [Candidates]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Candidate found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Candidate'
+        '404':
+          description: Candidate not found
+    put:
+      summary: Update candidate
+      tags: [Candidates]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCandidateRequest'
+      responses:
+        '200':
+          description: Candidate updated
+        '404':
+          description: Candidate not found
+    delete:
+      summary: Delete candidate
+      tags: [Candidates]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Candidate deleted
+        '404':
+          description: Candidate not found
+
+components:
+  schemas:
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+      required: [email, password]
+    RegisterRequest:
+      type: object
+      properties:
+        organizationId:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+      required: [organizationId, name, email, password]
+    Organization:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+    CreateOrganizationRequest:
+      type: object
+      properties:
+        name:
+          type: string
+      required: [name]
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        organizationId:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+    CreateUserRequest:
+      type: object
+      properties:
+        organizationId:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+      required: [organizationId, name, email, password]
+    UpdateUserRequest:
+      type: object
+      properties:
+        organizationId:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+      required: [organizationId, name, email]
+    Exercise:
+      type: object
+      properties:
+        id:
+          type: integer
+        creatorId:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+    CreateExerciseRequest:
+      type: object
+      properties:
+        creatorId:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+      required: [creatorId, title, description]
+    Candidate:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        githubProfile:
+          type: string
+    CreateCandidateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        githubProfile:
+          type: string
+      required: [name, email]

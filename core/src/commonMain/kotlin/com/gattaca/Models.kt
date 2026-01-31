@@ -12,7 +12,7 @@ data class User(val id: Int? = null, val organizationId: Int, val name: String, 
 data class Exercise(val id: Int? = null, val creatorId: Int, val title: String, val description: String)
 
 @Serializable
-data class Candidate(val id: Int? = null, val name: String, val email: String)
+data class Candidate(val id: Int? = null, val name: String, val email: String, val githubProfile: String? = null)
 
 @Serializable
 data class Evaluation(

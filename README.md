@@ -84,6 +84,15 @@ To stop and remove the infrastructure containers:
 make down
 ```
 
+## Documentation
+
+The API documentation is available via Swagger UI.
+Once the server is running (`make dev`), visit:
+**[http://localhost:8080/swagger](http://localhost:8080/swagger)**
+
+The raw OpenAPI spec is available at:
+`http://localhost:8080/openapi`
+
 ---
 
 ## Agent Guidelines

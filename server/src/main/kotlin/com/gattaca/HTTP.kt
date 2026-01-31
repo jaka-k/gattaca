@@ -37,14 +37,8 @@ import java.sql.DriverManager
 fun Application.configureHTTP() {
     install(ConditionalHeaders)
     routing {
-        swaggerUI(path = "openapi") {
-            info = OpenApiInfo(title = "My API", version = "1.0.0")
-        }
-    }
-    routing {
-        openAPI(path = "openapi") {
-            info = OpenApiInfo(title = "My API", version = "1.0.0")
-        }
+        swaggerUI(path = "swagger", swaggerFile = "openapi/documentation.yaml")
+        openAPI(path = "openapi", swaggerFile = "openapi/documentation.yaml")
     }
     install(AsyncApiPlugin) {
         extension = AsyncApiExtension.builder {

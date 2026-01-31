@@ -24,12 +24,17 @@ interface ExerciseRepository {
     suspend fun save(exercise: Exercise): Int
     suspend fun findById(id: Int): Exercise?
     suspend fun findAll(): List<Exercise>
+    suspend fun update(exercise: Exercise): Boolean
+    suspend fun delete(id: Int): Boolean
 }
 
 interface CandidateRepository {
     suspend fun save(candidate: Candidate): Int
     suspend fun findById(id: Int): Candidate?
     suspend fun findAll(): List<Candidate>
+    suspend fun findByEmail(email: String): Candidate?
+    suspend fun update(candidate: Candidate): Boolean
+    suspend fun delete(id: Int): Boolean
 }
 
 interface EvaluationRepository {

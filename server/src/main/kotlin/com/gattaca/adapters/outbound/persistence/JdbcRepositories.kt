@@ -160,18 +160,34 @@ class JdbcExerciseRepository(private val connection: Connection) : ExerciseRepos
             list
         }
     }
+    override suspend fun update(exercise: Exercise): Boolean = withContext(Dispatchers.IO) {
+        connection.prepareStatement("UPDATE exercises SET creator_id = ?, title = ?, description = ? WHERE id = ?").use { stmt ->
+            stmt.setInt(1, exercise.creatorId)
+            stmt.setString(2, exercise.title)
+            stmt.setString(3, exercise.description)
+            stmt.setInt(4, exercise.id ?: throw IllegalArgumentException("Exercise ID cannot be null for update"))
+            stmt.executeUpdate() > 0
+        }
+    }
+    override suspend fun delete(id: Int): Boolean = withContext(Dispatchers.IO) {
+        connection.prepareStatement("DELETE FROM exercises WHERE id = ?").use { stmt ->
+            stmt.setInt(1, id)
+            stmt.executeUpdate() > 0
+        }
+    }
 }
 
 class JdbcCandidateRepository(private val connection: Connection) : CandidateRepository {
     init {
         connection.createStatement().use { 
-            it.executeUpdate("CREATE TABLE IF NOT EXISTS candidates (id SERIAL PRIMARY KEY, name VARCHAR(255), email VARCHAR(255))")
+            it.executeUpdate("CREATE TABLE IF NOT EXISTS candidates (id SERIAL PRIMARY KEY, name VARCHAR(255), email VARCHAR(255), github_profile VARCHAR(255))")
         }
     }
     override suspend fun save(candidate: Candidate): Int = withContext(Dispatchers.IO) {
-        connection.prepareStatement("INSERT INTO candidates (name, email) VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS).use { stmt ->
+        connection.prepareStatement("INSERT INTO candidates (name, email, github_profile) VALUES (?, ?, ?)", Statement.RETURN_GENERATED_KEYS).use { stmt ->
             stmt.setString(1, candidate.name)
             stmt.setString(2, candidate.email)
+            stmt.setString(3, candidate.githubProfile)
             stmt.executeUpdate()
             val keys = stmt.generatedKeys
             if (keys.next()) keys.getInt(1) else throw Exception("Failed to save candidate")
@@ -181,16 +197,47 @@ class JdbcCandidateRepository(private val connection: Connection) : CandidateRep
         connection.prepareStatement("SELECT * FROM candidates WHERE id = ?").use { stmt ->
             stmt.setInt(1, id)
             val rs = stmt.executeQuery()
-            if (rs.next()) Candidate(rs.getInt("id"), rs.getString("name"), rs.getString("email")) else null
+            if (rs.next()) mapRow(rs) else null
         }
     }
     override suspend fun findAll(): List<Candidate> = withContext(Dispatchers.IO) {
         connection.createStatement().use { stmt ->
             val rs = stmt.executeQuery("SELECT * FROM candidates")
             val list = mutableListOf<Candidate>()
-            while (rs.next()) list.add(Candidate(rs.getInt("id"), rs.getString("name"), rs.getString("email")))
+            while (rs.next()) list.add(mapRow(rs))
             list
         }
+    }
+    override suspend fun findByEmail(email: String): Candidate? = withContext(Dispatchers.IO) {
+        connection.prepareStatement("SELECT * FROM candidates WHERE email = ?").use { stmt ->
+            stmt.setString(1, email)
+            val rs = stmt.executeQuery()
+            if (rs.next()) mapRow(rs) else null
+        }
+    }
+    override suspend fun update(candidate: Candidate): Boolean = withContext(Dispatchers.IO) {
+        connection.prepareStatement("UPDATE candidates SET name = ?, email = ?, github_profile = ? WHERE id = ?").use { stmt ->
+            stmt.setString(1, candidate.name)
+            stmt.setString(2, candidate.email)
+            stmt.setString(3, candidate.githubProfile)
+            stmt.setInt(4, candidate.id ?: throw IllegalArgumentException("Candidate ID cannot be null for update"))
+            stmt.executeUpdate() > 0
+        }
+    }
+    override suspend fun delete(id: Int): Boolean = withContext(Dispatchers.IO) {
+        connection.prepareStatement("DELETE FROM candidates WHERE id = ?").use { stmt ->
+            stmt.setInt(1, id)
+            stmt.executeUpdate() > 0
+        }
+    }
+
+    private fun mapRow(rs: java.sql.ResultSet): Candidate {
+        return Candidate(
+            rs.getInt("id"),
+            rs.getString("name"),
+            rs.getString("email"),
+            rs.getString("github_profile")
+        )
     }
 }
 
