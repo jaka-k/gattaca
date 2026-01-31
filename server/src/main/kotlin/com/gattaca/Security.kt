@@ -35,6 +35,13 @@ import java.sql.Connection
 import java.sql.DriverManager
 
 fun Application.configureSecurity() {
+    install(Sessions) {
+        cookie<UserSession>("USER_SESSION") {
+            cookie.path = "/"
+            cookie.maxAgeInSeconds = 3600
+        }
+    }
+
     authentication {
         oauth("auth-oauth-google") {
             urlProvider = { "http://localhost:8080/callback" }
@@ -66,4 +73,4 @@ fun Application.configureSecurity() {
         }
     }
 }
-class UserSession(accessToken: String)
+data class UserSession(val accessToken: String)

@@ -33,14 +33,15 @@ class JdbcOrganizationRepository(private val connection: Connection) : Organizat
 class JdbcUserRepository(private val connection: Connection) : UserRepository {
     init {
         connection.createStatement().use { 
-            it.executeUpdate("CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, organization_id INT, name VARCHAR(255), email VARCHAR(255))")
+            it.executeUpdate("CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, organization_id INT, name VARCHAR(255), email VARCHAR(255), password_hash VARCHAR(255))")
         }
     }
     override suspend fun save(user: User): Int = withContext(Dispatchers.IO) {
-        connection.prepareStatement("INSERT INTO users (organization_id, name, email) VALUES (?, ?, ?)", Statement.RETURN_GENERATED_KEYS).use { stmt ->
+        connection.prepareStatement("INSERT INTO users (organization_id, name, email, password_hash) VALUES (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS).use { stmt ->
             stmt.setInt(1, user.organizationId)
             stmt.setString(2, user.name)
             stmt.setString(3, user.email)
+            stmt.setString(4, user.passwordHash)
             stmt.executeUpdate()
             val keys = stmt.generatedKeys
             if (keys.next()) keys.getInt(1) else throw Exception("Failed to save user")
@@ -50,7 +51,7 @@ class JdbcUserRepository(private val connection: Connection) : UserRepository {
         connection.prepareStatement("SELECT * FROM users WHERE id = ?").use { stmt ->
             stmt.setInt(1, id)
             val rs = stmt.executeQuery()
-            if (rs.next()) User(rs.getInt("id"), rs.getInt("organization_id"), rs.getString("name"), rs.getString("email")) else null
+            if (rs.next()) mapRow(rs) else null
         }
     }
     override suspend fun findByOrganizationId(orgId: Int): List<User> = withContext(Dispatchers.IO) {
@@ -59,10 +60,27 @@ class JdbcUserRepository(private val connection: Connection) : UserRepository {
             val rs = stmt.executeQuery()
             val users = mutableListOf<User>()
             while (rs.next()) {
-                users.add(User(rs.getInt("id"), rs.getInt("organization_id"), rs.getString("name"), rs.getString("email")))
+                users.add(mapRow(rs))
             }
             users
         }
+    }
+    override suspend fun findByEmail(email: String): User? = withContext(Dispatchers.IO) {
+        connection.prepareStatement("SELECT * FROM users WHERE email = ?").use { stmt ->
+            stmt.setString(1, email)
+            val rs = stmt.executeQuery()
+            if (rs.next()) mapRow(rs) else null
+        }
+    }
+
+    private fun mapRow(rs: java.sql.ResultSet): User {
+        return User(
+            rs.getInt("id"),
+            rs.getInt("organization_id"),
+            rs.getString("name"),
+            rs.getString("email"),
+            rs.getString("password_hash")
+        )
     }
 }
 

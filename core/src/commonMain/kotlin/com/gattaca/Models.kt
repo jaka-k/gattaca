@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 data class Organization(val id: Int? = null, val name: String)
 
 @Serializable
-data class User(val id: Int? = null, val organizationId: Int, val name: String, val email: String)
+data class User(val id: Int? = null, val organizationId: Int, val name: String, val email: String, val passwordHash: String? = null)
 
 @Serializable
 data class Exercise(val id: Int? = null, val creatorId: Int, val title: String, val description: String)

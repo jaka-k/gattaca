@@ -11,6 +11,7 @@ interface UserRepository {
     suspend fun save(user: User): Int
     suspend fun findById(id: Int): User?
     suspend fun findByOrganizationId(orgId: Int): List<User>
+    suspend fun findByEmail(email: String): User?
 }
 
 interface ExerciseRepository {
