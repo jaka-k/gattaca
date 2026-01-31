@@ -5,13 +5,19 @@ import com.gattaca.*
 interface OrganizationRepository {
     suspend fun save(org: Organization): Int
     suspend fun findById(id: Int): Organization?
+    suspend fun findAll(): List<Organization>
+    suspend fun update(org: Organization): Boolean
+    suspend fun delete(id: Int): Boolean
 }
 
 interface UserRepository {
     suspend fun save(user: User): Int
     suspend fun findById(id: Int): User?
+    suspend fun findAll(): List<User>
     suspend fun findByOrganizationId(orgId: Int): List<User>
     suspend fun findByEmail(email: String): User?
+    suspend fun update(user: User): Boolean
+    suspend fun delete(id: Int): Boolean
 }
 
 interface ExerciseRepository {

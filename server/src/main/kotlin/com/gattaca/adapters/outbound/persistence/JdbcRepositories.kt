@@ -28,6 +28,27 @@ class JdbcOrganizationRepository(private val connection: Connection) : Organizat
             if (rs.next()) Organization(rs.getInt("id"), rs.getString("name")) else null
         }
     }
+    override suspend fun findAll(): List<Organization> = withContext(Dispatchers.IO) {
+        connection.createStatement().use { stmt ->
+            val rs = stmt.executeQuery("SELECT * FROM organizations")
+            val list = mutableListOf<Organization>()
+            while (rs.next()) list.add(Organization(rs.getInt("id"), rs.getString("name")))
+            list
+        }
+    }
+    override suspend fun update(org: Organization): Boolean = withContext(Dispatchers.IO) {
+        connection.prepareStatement("UPDATE organizations SET name = ? WHERE id = ?").use { stmt ->
+            stmt.setString(1, org.name)
+            stmt.setInt(2, org.id ?: throw IllegalArgumentException("Organization ID cannot be null for update"))
+            stmt.executeUpdate() > 0
+        }
+    }
+    override suspend fun delete(id: Int): Boolean = withContext(Dispatchers.IO) {
+        connection.prepareStatement("DELETE FROM organizations WHERE id = ?").use { stmt ->
+            stmt.setInt(1, id)
+            stmt.executeUpdate() > 0
+        }
+    }
 }
 
 class JdbcUserRepository(private val connection: Connection) : UserRepository {
@@ -54,6 +75,14 @@ class JdbcUserRepository(private val connection: Connection) : UserRepository {
             if (rs.next()) mapRow(rs) else null
         }
     }
+    override suspend fun findAll(): List<User> = withContext(Dispatchers.IO) {
+        connection.createStatement().use { stmt ->
+            val rs = stmt.executeQuery("SELECT * FROM users")
+            val list = mutableListOf<User>()
+            while (rs.next()) list.add(mapRow(rs))
+            list
+        }
+    }
     override suspend fun findByOrganizationId(orgId: Int): List<User> = withContext(Dispatchers.IO) {
         connection.prepareStatement("SELECT * FROM users WHERE organization_id = ?").use { stmt ->
             stmt.setInt(1, orgId)
@@ -70,6 +99,22 @@ class JdbcUserRepository(private val connection: Connection) : UserRepository {
             stmt.setString(1, email)
             val rs = stmt.executeQuery()
             if (rs.next()) mapRow(rs) else null
+        }
+    }
+    override suspend fun update(user: User): Boolean = withContext(Dispatchers.IO) {
+        connection.prepareStatement("UPDATE users SET organization_id = ?, name = ?, email = ?, password_hash = ? WHERE id = ?").use { stmt ->
+            stmt.setInt(1, user.organizationId)
+            stmt.setString(2, user.name)
+            stmt.setString(3, user.email)
+            stmt.setString(4, user.passwordHash)
+            stmt.setInt(5, user.id ?: throw IllegalArgumentException("User ID cannot be null for update"))
+            stmt.executeUpdate() > 0
+        }
+    }
+    override suspend fun delete(id: Int): Boolean = withContext(Dispatchers.IO) {
+        connection.prepareStatement("DELETE FROM users WHERE id = ?").use { stmt ->
+            stmt.setInt(1, id)
+            stmt.executeUpdate() > 0
         }
     }
 

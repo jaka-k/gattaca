@@ -3,6 +3,8 @@ package com.gattaca
 import com.gattaca.adapters.inbound.web.auth.authRoutes
 import com.gattaca.adapters.inbound.web.dashboard.dashboardRoutes
 import com.gattaca.adapters.inbound.web.landing.landingRoutes
+import com.gattaca.adapters.inbound.web.organization.organizationRoutes
+import com.gattaca.adapters.inbound.web.user.userRoutes
 import io.ktor.server.application.*
 import io.ktor.server.http.content.*
 import io.ktor.server.routing.*
@@ -12,6 +14,8 @@ fun Application.configureRouting(repos: AppRepositories) {
         staticResources("/static", "static")
         
         authRoutes(repos.userRepo)
+        organizationRoutes(repos.orgRepo)
+        userRoutes(repos.userRepo)
         landingRoutes(repos.exerciseRepo)
         dashboardRoutes(
             repos.orgRepo,
